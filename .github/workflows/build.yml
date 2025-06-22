@@ -1,0 +1,54 @@
+name: Build APK
+
+on:
+  workflow_dispatch:  # Запуск вручную
+  push:
+    branches: [ main ]  # или другая ветка, где код
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: 📦 Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          build-essential \
+          git \
+          zip unzip \
+          openjdk-11-jdk \
+          python3-pip \
+          python3-setuptools \
+          python3-wheel \
+          libffi-dev \
+          libssl-dev \
+          libsqlite3-dev \
+          zlib1g-dev \
+          libbz2-dev \
+          libreadline-dev \
+          libncurses5-dev \
+          libncursesw5-dev \
+          liblzma-dev \
+          libgdbm-dev
+
+        pip install --upgrade pip
+        pip install cython virtualenv buildozer
+
+    - name: 🛠 Build APK
+      run: |
+        buildozer android debug
+
+    - name: 📤 Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: my-kivy-app
+        path: bin/*.apk
